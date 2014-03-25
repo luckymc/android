@@ -1,0 +1,171 @@
+Handler:
+	handler.post(runnable); // add runnable to the message queue.
+	handler.postDelayed(runnable, 3000);
+	
+	Message msg = handler.obtainMessage(); // Returns a new Message from the global message pool.
+	msg.arg1 arg2 obj
+	
+	handler.sendMessage(msg); // push msg to the end of the message queue.
+	msg.sendToTarget(); // send msg to the Handler.
+	
+	handler.removeCallbacks(runnable); // remove runnable from the message queue.
+	注：handler处理的线程运行于主线程
+	
+	// 使用Looper处理消息队列
+	// starting a new thread that has a looper
+	HandlerThread ht = new HandlerThread("handlerthread");
+	ht.start();
+	MyHandler mh = new MyHandler(ht.getLooper());
+	
+	class MyHandler extends Handler {
+		// associates this handler with the looper for the current thread.
+		public MyHandler() {}
+		
+		// use the provided Looper instead the default one
+		public MyHandler(Looper looper) {}
+	}
+	注：handlerthread在新线程中处理消息
+	
+SQLite:
+	// 继承SQLiteOpenHelper
+	class DBHelper extends SQLiteOpenHelper {}
+	
+	DBHelper dh = new DBHelper(MainActivity.this, "test"); // test数据库名
+	SQLiteDatabase sdb = dh.getReadableDatabase(); // 获取数据库读操作
+	SQLiteDatabase sdb = dh.getWritableDatabase(); // 获取数据库写操作
+	
+	ContentValues value = new ContentValues)();
+	value.put("id", 1);
+	value.put("name", "chen");
+	sdb.insert("user", null, value);
+	
+	sdb.update("user", value, "id=?", new String[]{"1"});
+	
+	Cursor cursor = sdb.query("user", new String[]{"id", "name"}, "id=?", new String[]{"1"}, groupby, having, orderby);
+	while (cursor.moveToNext()) {
+		String name = cursor.getString(cursor.getColumnIndex("name"));
+	}
+	
+Download File:
+	1、创建一个URL对象
+	   url = new URL("127.0.0.1/a.txt");
+	2、通过URL对象，创建一个HttpURLConnection对象
+	   HttpURLConnection urlConn = (HttpURLConnection)url.openConnection();
+	3、得到InputStream
+	   BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+	4、从InputSream当中读取数据
+       StringBuffer sb = new StringBuffer();
+	   while ((line = br.readLine()) != null) {
+		   sb.append(line);
+	   }
+	
+	访问SDCARD
+		android.permission.INTERNET
+		android.permission.WRITE_EXTERNAL_STORAGE
+		
+		Environment.getExternalStorageDirectory();
+		
+		new File(path + dirname).mkdir();
+		new File(path + filename).createNewFile();
+		new File(path + filename).exists();
+		
+		OutputStream output = new FileOutputStream(file);
+		byte buffer[] = new byte[4 * 1024];
+		while ((input.read(buffer)) != -1) {
+			output.write(buffer);
+		}
+		output.flush();
+
+ContentProvider
+	
+
+XML文件解析
+	创建一个SAXParserFactory
+	SAXParserFactory factory = SAXParserFactory.newInstance();
+	XMLReader reader = factory.newSAXParser().getXMLReader();
+	// 为XMLReader设置内容处理器
+	reader.setContentHandler(new MyContentHandler());
+	// 开始解析文件
+	reader.parse(new InputSource(new StringReader(xmlStr)));
+	
+	// DefaultHandler实现了ContentHandler接口
+	class MyContentHandler extends DefaultHandler {	}
+	
+	
+广播机制
+	intent.setAction(Intent.ACTION_EDIT);
+	sendBroadcast(intent);
+	
+	// 每次接收都会生成一个新的reciver对象 onRecive return后释放
+	class TestReciver extends BroadcastReciver {
+		@Override
+		public void onRecive(Context context, Intent intent) {
+			...
+		}
+	}
+	
+	注册方式1：特点-应用程序关闭后仍可以接收
+	<receiver android:name=".TestReciver">
+		<intent-filter>
+			<action android:name="android.intent.action.EDIT" />
+		</intent-filter>
+	</receiver>
+	
+	注册方式2：
+	registerReceiver(receiver, filter);
+	unregisterReceiver(receiver);
+	
+	smsReceiver = new SMSReceiver();
+	IntentFilter filter = new IntentFilter();
+	filter.addAction("SMS_RECEIVERED");
+	this.registerReceiver(smsReceiver, filter);
+	
+	// 短信内容  pdus属性
+	Bundle bundle = intent.getExtras();
+	object[] pdus = (Object[]) bundler.get('pdus');
+	SmsMessage[] msg = new SmsMessage(puds.length);
+	msg[i] = SmsMessage.createFromPdu(byte[] puds[i]);
+	msg[i].getDisplayMessageBody();
+	
+	
+WIFI网络操作
+	android.permission.CHANGE_NETWORD_STATE
+	android.permission.CHANGE_WIFI_STAT
+	android.permission.ACCESS_NETWORK_STATE
+	android.permission.ACCESS_WIFI_STATE
+	
+	WifiManager wifiManager = (WifiManager)Context.getSystemService(Service.WIFI_SERVICE);
+	wifiManager.setWifiEnabled(true|false);
+	wifiManager.getWifiState();
+	
+Socket编程
+	TCP:
+		ServerSocket ss = new ServerSocket(4567);
+		Socket s = ss.accept();
+		InputStream is = s.getInputStream();
+		byte buffer[] = new byte(4*1024);
+		while ((temp = is.read(buffer) != -1) {
+			new String(buffer, 0, temp);
+		}
+	
+		ServerSocket InputStream
+		Socket socket = new Socket('192.168.1.1', 4567);
+		InputStream is = new InputStream(file);
+		OutputStream os = socket.getOutputStream(0;
+		byte buffer[] = new bytes[4*1024);
+		while ((temp = is.read(buffer) != -1) {
+			os.write(buffer, 0, temp);
+		}
+		os.flush();
+	UDP:
+		DatagramSocket socket = new DatagramSocket(4567);
+		data[] = new byte[1024];
+		DatagramPacket packet = new DatagramPacket(data, data.length);
+		socket.receive(packet);
+	
+		DatagramSocket socket = new DatagramSocket(4567);
+		InetAddress add = InetAddress.getByName("192.168.1.1");
+		byte data[] = "hello".getBytes();
+		DatagramPacket packet = new DatagramPacket(data, data.length, add, 4567);
+		socket.send(packet);
+	
